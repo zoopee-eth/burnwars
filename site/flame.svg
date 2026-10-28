@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+ <defs>
+  <linearGradient id="core" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff2e3b"/><stop offset=".5" stop-color="#ff5a1f"/><stop offset="1" stop-color="#ffb21f"/></linearGradient>
+  <linearGradient id="hot" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff3c4"/><stop offset="1" stop-color="#ffd25a"/></linearGradient>
+ </defs>
+ <path d="M54 214 C14 196 6 150 30 112 C34 136 46 146 56 148 C46 118 52 86 74 62 C76 92 86 104 96 108 Z" fill="#a46bff"/>
+ <path d="M146 214 C186 196 194 150 170 112 C166 136 154 146 144 148 C154 118 148 86 126 62 C124 92 114 104 104 108 Z" fill="#c6f43c"/>
+ <path d="M70 222 C34 200 40 148 70 118 C72 140 82 152 92 154 C86 120 96 74 120 40 C118 80 134 100 146 116 C170 150 160 204 128 222 Z" fill="#3b7bff"/>
+ <path d="M100 4 C108 52 150 86 152 142 C154 190 128 226 100 228 C72 226 46 192 50 150 C52 120 66 104 78 94 C78 116 86 130 98 134 C90 92 96 44 100 4 Z" fill="url(#core)"/>
+ <path d="M100 228 C78 226 66 206 68 184 C70 160 86 148 92 132 C98 152 118 162 122 184 C126 208 116 226 100 228 Z" fill="#f3ba2f"/>
+ <path d="M100 226 C88 224 82 212 84 200 C86 186 96 178 100 168 C106 182 116 190 116 204 C116 216 110 224 100 226 Z" fill="url(#hot)"/>
+</svg>
