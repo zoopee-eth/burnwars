@@ -25,7 +25,7 @@ async function main() {
     const hit = pl && (pl.launches || []).find(x => (x.pools || []).some(p => String(p.token).toLowerCase() === String(coin.ca).toLowerCase()));
     if (hit) coin.slug = hit.slug;
   }
-  if (!coin.slug) { fs.writeFileSync(path.join(OUT, 'data.json'), JSON.stringify({ at: now, prelaunch: true, ca: coin.ca || null, x: coin.x || null })); console.log('no coin yet: pre-launch data'); return; }
+  if (!coin.slug) { fs.writeFileSync(path.join(OUT, 'data.json'), JSON.stringify({ at: now, prelaunch: true, ca: coin.ca || null, evm: coin.evm || null, x: coin.x || null })); console.log('no coin yet: pre-launch data'); return; }
   const [pools, hist, holders] = await Promise.all([
     getJson(`${PANGEA}/api/pools`),
     getJson(`${PANGEA}/api/history?hours=24&launch=${encodeURIComponent(coin.slug)}`).catch(() => null),
@@ -63,7 +63,7 @@ async function main() {
   if (prev && prev.day && prev.day !== day && prev.leaderToday) winners.unshift({ day: prev.day, chain: prev.leaderToday.chain, todayPct: prev.leaderToday.todayPct });
   const series = ((prev && prev.series) || []).concat([{ at: now, b: Object.fromEntries(chains.map(c => [c.chain, c.burnedPct])) }]).slice(-600);
   const totalBurned = chains.reduce((a, c) => a + c.burned, 0);
-  const data = { at: now, ca: coin.ca || null, x: coin.x || null, slug: coin.slug, symbol: l.symbol, name: l.name, day, dayStart, chains, leader: chains[0] ? chains[0].chain : null,
+  const data = { at: now, ca: coin.ca || null, evm: coin.evm || null, x: coin.x || null, slug: coin.slug, symbol: l.symbol, name: l.name, day, dayStart, chains, leader: chains[0] ? chains[0].chain : null,
     leaderToday: leaderToday && leaderToday.todayPct > 0 ? { chain: leaderToday.chain, todayPct: leaderToday.todayPct } : null,
     totalBurned, vol24: chains.reduce((a, c) => a + c.vol24, 0), holders: holders && holders.all ? holders.all.count : null,
     events: events.slice(-80), winners: winners.slice(0, 30), series };
