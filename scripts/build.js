@@ -19,6 +19,12 @@ const dayKey = t => new Date(t).toLocaleDateString('en-CA', { timeZone: 'UTC' })
 async function main() {
   let prev = null; try { prev = JSON.parse(fs.readFileSync(path.join(OUT, 'data.json'), 'utf8')); } catch {}
   const now = Date.now();
+  // the coin can be named by its Pangea slug or by any of its token addresses
+  if (!coin.slug && coin.ca) {
+    const pl = await getJson(`${PANGEA}/api/pools`).catch(() => null);
+    const hit = pl && (pl.launches || []).find(x => (x.pools || []).some(p => String(p.token).toLowerCase() === String(coin.ca).toLowerCase()));
+    if (hit) coin.slug = hit.slug;
+  }
   if (!coin.slug) { fs.writeFileSync(path.join(OUT, 'data.json'), JSON.stringify({ at: now, prelaunch: true, ca: coin.ca || null, x: coin.x || null })); console.log('no coin yet: pre-launch data'); return; }
   const [pools, hist, holders] = await Promise.all([
     getJson(`${PANGEA}/api/pools`),
