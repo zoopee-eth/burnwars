@@ -1,5 +1,5 @@
 # Publishes the Burn Wars scoreboard (site/) to GitHub Pages with fresh data (site/data.json, never committed).
-# Each run starts the next one about 10 minutes later (GitHub's own schedule skips runs for hours);
+# Each run starts the next one about 2-3 minutes later (GitHub's own schedule skips runs for hours);
 # the hourly schedule only restarts the chain if it ever breaks.
 name: Publish Burn Wars
 on:
@@ -50,10 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Start the next run in ~10 minutes
+      - name: Start the next run in ~2 minutes
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sleep 480
+          sleep 100
           active=$(gh run list -R "$GITHUB_REPOSITORY" -w pages.yml -L 20 --json status -q '[.[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="pending" or .status=="requested")] | length')
           if [ "$active" -le 1 ]; then gh workflow run pages.yml -R "$GITHUB_REPOSITORY" --ref main; else echo "another run is already queued ($active active)"; fi
