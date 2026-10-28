@@ -179,7 +179,7 @@ function render(D) {
   const todays = ORDER.map(k => D.chains.find(c => c.chain === k)).filter(Boolean);
   const tLead = D.leaderToday && D.leaderToday.chain;
   $('#today').innerHTML = todays.map(c => `<div style="--c:${col(c.chain)}"><b>${c.chain === tLead ? '🔥 ' : ''}${pct(c.todayPct)}</b><span>${NAME[c.chain]} · ${big(c.today)} burned today</span></div>`).join('');
-  $('#winners').innerHTML = (D.winners || []).length ? 'Past winners: ' + D.winners.slice(0, 7).map(w => `<b style="color:${col(w.chain)}">${NAME[w.chain]}</b> <span>(${esc(w.day.slice(5))})</span>`).join(' · ') : 'The first daily winner is crowned at 00:00 UTC.';
+  $('#winners').innerHTML = (D.winners || []).length ? 'Past winners: ' + D.winners.slice(0, 7).map(w => `<b style="color:${col(w.chain)}">${NAME[w.chain]}</b> <span>(${esc(w.day.slice(5))})</span>`).join(' · ') : 'The first daily winner is crowned when today\u2019s countdown ends.';
   $('#chart').innerHTML = chart(D.series);
   $('#legend').innerHTML = ORDER.map(c => `<span><i class="sw" style="background:${col(c)}"></i>${NAME[c]}</span>`).join('');
   const ev = (D.events || []).slice().reverse();
@@ -189,6 +189,14 @@ async function load() {
   try { const r = await fetch('data.json?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' }); if (!r.ok) throw 0; render(await r.json()); }
   catch { render({ at: Date.now(), prelaunch: true }); $('#updated').textContent = 'warming up'; }
 }
+// the war day ends at 00:00 UTC: show when that is in the visitor's own time, with a countdown
+function dayEnd() {
+  const n = new Date(), end = Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() + 1);
+  const left = end - n, h = Math.floor(left / 36e5), m = Math.floor(left % 36e5 / 6e4);
+  const local = new Date(end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  $('#dayNote').textContent = `winner crowned at ${local} your time · ${h}h ${m}m left`;
+}
+dayEnd(); setInterval(dayEnd, 30_000);
 load(); setInterval(load, 60_000);
 </script>
 </body>
