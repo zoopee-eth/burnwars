@@ -16,6 +16,15 @@ async function getJson(url, ms = 30_000) {
 }
 const dayKey = t => new Date(t).toLocaleDateString('en-CA', { timeZone: 'UTC' });   // the war day runs on UTC
 
+// real holders: leave out the pool, the burn address / Solana incinerator, and dust (under 1 token)
+const BURNERS = /^(0x0{24}0{12}dead|1nc1nerator11111111111111111111111111111111)$/i;
+function realHolders(hd) {
+  if (!hd || !Array.isArray(hd.rows)) return hd && hd.count != null ? hd.count : null;
+  const real = hd.rows.filter(r => !r.label && !BURNERS.test(String(r.address)) && Number(r.balance) >= 1).length;
+  // rows stop at 100: past that, take the count minus what we know isn't a holder
+  return hd.rows.length >= 100 ? Math.max(real, (hd.count || 0) - (hd.rows.length - real)) : real;
+}
+
 async function main() {
   let prev = null; try { prev = JSON.parse(fs.readFileSync(path.join(OUT, 'data.json'), 'utf8')); } catch {}
   const now = Date.now();
@@ -52,7 +61,7 @@ async function main() {
     const today = Math.max(0, burned - (dayStart[c] ?? burned));
     return { chain: c, burned: Math.round(burned), burnedPct: +(burned / supply * 100).toFixed(4), today: Math.round(today), todayPct: +(today / supply * 100).toFixed(4),
       priceUsd: p.priceUsd || null, mcapUsd: p.priceUsd ? Math.round(p.priceUsd * (supply - burned)) : null, liqUsd: p.reservesUsd != null ? Math.round(p.reservesUsd) : null,
-      vol24: Math.round(v.volumeUsd || 0), trades24: v.trades || 0, holders: hd.count ?? null, token: p.token || null, error: p.error || null };
+      vol24: Math.round(v.volumeUsd || 0), trades24: v.trades || 0, holders: realHolders(hd), token: p.token || null, error: p.error || null };
   });
   if (!sameDay) for (const c of chains) dayStart[c.chain] = dayStart[c.chain] ?? c.burned;
   chains.sort((a, b) => b.burnedPct - a.burnedPct || b.vol24 - a.vol24);
@@ -65,7 +74,7 @@ async function main() {
   const totalBurned = chains.reduce((a, c) => a + c.burned, 0);
   const data = { at: now, ca: coin.ca || null, evm: coin.evm || null, x: coin.x || null, slug: coin.slug, symbol: l.symbol, name: l.name, day, dayStart, chains, leader: chains[0] ? chains[0].chain : null,
     leaderToday: leaderToday && leaderToday.todayPct > 0 ? { chain: leaderToday.chain, todayPct: leaderToday.todayPct } : null,
-    totalBurned, vol24: chains.reduce((a, c) => a + c.vol24, 0), holders: holders && holders.all ? holders.all.count : null,
+    totalBurned, vol24: chains.reduce((a, c) => a + c.vol24, 0), holders: chains.reduce((a, c) => a + (c.holders || 0), 0),
     events: events.slice(-80), winners: winners.slice(0, 30), series };
   fs.writeFileSync(path.join(OUT, 'data.json'), JSON.stringify(data));
   console.log(`${l.symbol}: ${chains.map(c => `${c.chain} ${c.burnedPct}%`).join(' · ')} · ${events.length} burn events`);
