@@ -26,6 +26,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Note the start time
+        run: echo "T0=$(date +%s)" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -45,9 +47,8 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-          STARTED: ${{ github.run_started_at }}
         run: |
-          elapsed=$(( $(date +%s) - $(date -d "$STARTED" +%s) ))
+          elapsed=$(( $(date +%s) - ${T0:-0} ))
           wait=$(( 540 - elapsed )); if [ $wait -gt 0 ]; then sleep $wait; fi
           active=$(gh run list -R "$GITHUB_REPOSITORY" -w pages.yml -L 20 --json status -q '[.[] | select(.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="pending" or .status=="requested")] | length')
           if [ "$active" -le 1 ]; then gh workflow run pages.yml -R "$GITHUB_REPOSITORY" --ref main; else echo "another run is already queued ($active active)"; fi
