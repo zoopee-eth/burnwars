@@ -17,7 +17,7 @@ concurrency:
   group: pages
   cancel-in-progress: false
 env:
-  SITE: https://zoopee-eth.github.io/burnwars
+  SITE: https://burnwars.lol
 jobs:
   deploy:
     runs-on: ubuntu-latest
